@@ -355,11 +355,11 @@ Polymer({
         // find widest possible value
         // use string length as best approximation
         // (may be inaccurate for non-monospace fonts)
-        var maxVal = this.max.toString(),
-            minVal = this.min.toString(),
+        var maxVal = this.formatted(this.max),
+            minVal = this.formatted(this.min),
             maxStr = maxVal.length > minVal.length ? maxVal : minVal;
         this._mapping && Object.keys(this._mapping).forEach(function(k){
-            var v = this._mapping[k].toString();
+            var v = this.formatted(this._mapping[k]);
             if (v.length > maxStr.length) {
                 maxStr = v;
             }
