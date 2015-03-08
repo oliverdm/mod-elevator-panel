@@ -1,0 +1,14 @@
+{
+    "name": "mod-elevator-panel",
+    "version": "0.1.0",
+    "main": "mod-elevator-panel.html",
+    "ignore": ["demo.html", "README.md", ".gitignore"],
+    "keywords": ["elevator", "input", "component"],
+    "dependencies": {
+        "polymer": "Polymer/polymer#^0.5.5",
+        "webcomponentsjs": "Polymer/webcomponentsjs#^0.5.5",
+        "core-icon": "Polymer/core-icon#^0.5.5",
+        "core-icons": "Polymer/core-icons#^0.5.5"
+    },
+    "private": false
+}
