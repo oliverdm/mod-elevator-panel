@@ -1,9 +1,15 @@
 {
     "name": "odm-elevator-panel",
-    "version": "0.1.0",
+    "description": "HTML element that resembles an elevator panel with an -up- button, -down- button and a display. Implemented as web component using Polymer.",
+    "version": "0.2.0",
     "main": "odm-elevator-panel.html",
     "ignore": ["demo.html", "README.md", ".gitignore"],
     "keywords": ["elevator", "input", "component"],
+    "url": "http://github.com/oliverdm/odm-elevator-panel",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/oliverdm/odm-elevator-panel.git"
+    },
     "dependencies": {
         "polymer": "Polymer/polymer#^0.5.5",
         "webcomponentsjs": "Polymer/webcomponentsjs#^0.5.5",
