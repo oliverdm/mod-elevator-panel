@@ -1,0 +1,457 @@
+<link rel="import" href="../core-icon/core-icon.html">
+<link rel="import" href="../core-icons/core-icons.html">
+<link rel="import" href="../core-icons/hardware-icons.html">
+
+<polymer-element name="odm-elevator-panel">
+<template>
+    
+<style>
+:host {
+    display: inline-block;
+    user-select: none;
+    -ms-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-touch-callout: none;
+}
+core-icon {
+    width: 32px;
+    height: 32px;
+    color: #000;
+    background-color: #eee;
+    cursor: pointer;
+    border-radius: 2px;
+}
+core-icon[disabled] {
+    color: #ccc;
+    background-color: #f3f3f3;
+    cursor: default;
+}
+core-icon:hover {
+    color: #333;
+}
+core-icon:active {
+    color: #666;
+    background-color: #f3f3f3;
+}
+#valueContainer {
+    position: relative;
+    font-weight: bolder;
+    cursor: default;
+}
+#val, #widthSpacer {
+    margin: 4px;
+    text-align: center;
+    white-space: pre;
+}
+#widthSpacer {
+    visibility: hidden;
+}
+</style>
+
+<!-- dynamic, self-centering layout -->
+<div vertical?="{{ !horizontal }}"
+     horizontal?="{{ horizontal }}"
+     reverse?="{{ horizontal }}"
+     center layout>
+    <core-icon id="moreBtn"
+               icon="{{ _iconMore }}"
+               disabled?="{{ value >= max || disabled }}"></core-icon>
+    <div id="valueContainer">
+        <!-- expands to fill container completely -->
+        <div id="val" fit>{{ value | formatted }}</div>
+        <!-- provides consistent width (widest possible value) -->
+        <div id="widthSpacer" aria-hidden="true"></div>
+    </div>
+    <core-icon id="lessBtn"
+               icon="{{ _iconLess }}"
+               disabled?="{{ value <= min || disabled }}"></core-icon>
+</div>
+
+</template>
+<script>
+Polymer({
+    
+    /**
+     * Fired when the value changed through user interaction.
+     * The event can represent mutiple changes that are part of a single
+     * sequence of user interactions.
+     * The time window that defines which changes fall into a sequence is set
+     * by the <code>eventDelay</code> attribute.
+     * The event is not fired when the <code>disabled</code> attribute evaluates
+     * to true.
+     *
+     * @event change
+     */
+    
+    publish: {
+        /**
+         * Setting this property to true disables contained components and
+         * prevents the <code>change</code> event from being fired.
+         * 
+         * @attribute disabled
+         * @type boolean
+         * @default false
+         */
+        disabled: {
+            value: false,
+            reflect: true
+        },
+        /**
+         * If this property is set to true visual components are arranged in a
+         * horizontal layout:
+         * <ul>
+         * <li>decrement button left</li>
+         * <li>increment button right</li>
+         * <li>value center</li>
+         * </ul>
+         * Otherwise components are arranged in a vertical layout:
+         * <ul>
+         * <li>increment button at the top</li>
+         * <li>decrement button at the bottom</li>
+         * <li>value in the middle</li>
+         * </ul>
+         * 
+         * @attribute horizontal
+         * @type boolean
+         * @default false
+         */
+        horizontal: false,
+        /**
+         * Optional prefix that is prepended to the value.
+         * 
+         * @attribute valuePrefix
+         * @type string
+         * @default ""
+         */
+        valuePrefix: '',
+        /**
+         * Optional suffix that is appended to the value.
+         * 
+         * @attribute valueSuffix
+         * @type string
+         * @default ""
+         */
+        valueSuffix: '',
+        /**
+         * If this property is set the increment button icon is changed to this
+         * value. Must be a valid value for <code>core-icon</code>'s icon
+         * attribute: <code><core-icon icon={{ iconMore }}></code>.
+         * <br>
+         * Can be a String or an object of the following structure:
+         * <pre>
+         * {
+         *   "v": "iconToDisplayInVerticalLayout",
+         *   "h": "iconToDisplayInHorizontalLayout"
+         * }
+         * </pre>
+         * Note: icons must be available without further HTML imports; imports
+         * are not added automatically
+         * 
+         * @attribute iconMore
+         * @type string|object
+         * @default {"v": "hardware:keyboard-arrow-up", "h": "hardware:keyboard-arrow-right"}
+         */
+        iconMore: null,
+        /**
+         * Same as "iconMore" attribute but for the decrement button icon.
+         * 
+         * @attribute iconLess
+         * @type string|object
+         * @default {"v": "hardware:keyboard-arrow-down", "h": "hardware:keyboard-arrow-left"}
+         */
+        iconLess: null,
+        /**
+         * The current value.
+         * Setting this property does not trigger the <code>change</code> event.
+         * 
+         * @attribute value
+         * @type number
+         * @default 0
+         */
+        value: 0,
+        /**
+         * Optional mapping of numeric values to arbitrary string values.
+         * The numeric value is displayed if a mapping is not available for a 
+         * given value.
+         * Must be either an object:
+         * <pre>
+         * {
+         *   "0": "Mapped value for zero"
+         *   "1": "Mapped value for one"
+         *   ...
+         * }
+         * </pre>
+         * or an array:
+         * <pre>
+         * [
+         *   'Mapped value for zero',
+         *   'Mapped value for one'
+         * ]
+         * </pre>
+         * or a valid JSON string that contains an object/array.
+         * Values used as keys are guaranteed to be integers unless the
+         * increment itself is not an integer.
+         * 
+         * @attribute valueMap
+         * @type object
+         * @default null
+         */
+        valueMap: null,
+        /**
+         * The minimum value.
+         * Can be negative.
+         * Should be smaller than the <code>max</code> attribute.
+         * 
+         * @attribute min
+         * @type number
+         * @default 0
+         */
+        min: 0,
+        /**
+         * The maximum value.
+         * Can be negative.
+         * All negative values can also be simulated through a custom prefix.
+         * Should be bigger than the <code>min</code> attribute.
+         * 
+         * @attribute max
+         * @type number
+         * @default 100
+         */
+        max: 100,
+        /**
+         * The increment per value change.
+         * 
+         * @attribute increment
+         * @type number
+         * @default 1
+         */
+        increment: 1,
+        /**
+         * The pause in milliseconds after each value change that has to pass
+         * for the <code>change</code> event to be triggered.
+         * Further changes within this period push the <code>change</code> event
+         * further back.
+         * A larger value will tend to reduce the number of <code>change</code>
+         * events that are fired for changes in quick succession.
+         * A smaller value will tend to increase the number of
+         * <code>change</code> events that are fired for changes in quick
+         * succession.
+         * 
+         * @attribute eventDelay
+         * @type number
+         * @default 750
+         */
+        eventDelay: 750,
+        /**
+         * The time delay in milliseconds when holding down the mouse or
+         * touching a button until the value is changed continously.
+         * The delay is incrementally reduced for each further continous
+         * change until it reaches its minimum of a quarter of the base delay
+         * after two seconds.
+         * 
+         * @attribute holdInterval
+         * @type number
+         * @default 200
+         */
+        holdInterval: 200
+    },
+    
+    /**
+     * Returns the mapped value for the current numeric value. Read-only.
+     * 
+     * @returns {string|null} the mapped value or null
+     */
+    get mappedValue(){
+        return this.mappedValueOf(this.value);
+    },
+    
+    _iconMore: '',
+    _iconLess: '',
+    
+    _changeTimeout: null,
+    
+    _holdTimeout: null,
+    _holdStartTime: null,
+    _holdMinIntervalThreshold: 2000,
+    _holdMinIntervalMultiplier: 0.25,
+    
+    _blockedEventType: null,
+    _unblockTimeout: null,
+    _blockDuration: 1000,
+    
+    _mapping: null,
+    
+    eventDelegates: {
+        'mousedown': 'changeValue',
+        'touchstart': 'changeValue',
+        'mouseup': 'clearHold',
+        'touchend': 'clearHold',
+        'mouseout': 'clearHold'
+    },
+    
+    observe: {
+        min: 'updateWidth',
+        max: 'updateWidth',
+        valuePrefix: 'updateWidth',
+        valueSuffix: 'updateWidth'
+    },
+    
+    created: function(){
+        // default values for iconMore and iconLess
+        this.iconMore = this.iconMore || {
+            v: 'hardware:keyboard-arrow-up',
+            h: 'hardware:keyboard-arrow-right'
+        };
+        this.iconLess = this.iconLess || {
+            v: 'hardware:keyboard-arrow-down',
+            h: 'hardware:keyboard-arrow-left'
+        };
+        // initialize icons when not horizontal layout
+        this.horizontal || this.horizontalChanged();
+    },
+    
+    attached: function(){
+        this.updateWidth();
+    },
+    
+    iconMoreChanged: function(){
+        this._iconMore = this.iconMore[this.horizontal ? 'h' : 'v'] || this.iconMore;
+    },
+    
+    iconLessChanged: function(){
+        this._iconLess = this.iconLess[this.horizontal ? 'h' : 'v'] || this.iconLess;
+    },
+    
+    horizontalChanged: function(){
+        this.iconMoreChanged();
+        this.iconLessChanged();
+    },
+    
+    valueMapChanged: function(){
+        switch (typeof this.valueMap) {
+            case 'object':
+                this._mapping = this.valueMap || {};
+                break;
+            case 'string':
+                try {
+                    this._mapping = JSON.parse(this.valueMap);
+                } catch(e) {
+                    this._mapping = {};
+                }
+                break;
+            default:
+                this._mapping = {};
+                break;
+        }
+        this.updateWidth();
+        // Force update of value expression
+        // TODO Better way to update value expression
+        this.value += '';
+    },
+    
+    updateWidth: function(){
+        // find widest possible value
+        // use string length as best approximation
+        // (may be inaccurate for non-monospace fonts)
+        var maxVal = this.formatted(this.max),
+            minVal = this.formatted(this.min),
+            maxStr = maxVal.length > minVal.length ? maxVal : minVal;
+        this._mapping && Object.keys(this._mapping).forEach(function(k){
+            var v = this.formatted(this._mapping[k]);
+            if (v.length > maxStr.length) {
+                maxStr = v;
+            }
+        }, this);
+        // update spacer width the widest value
+        this.$.widthSpacer.textContent = maxStr;
+    },
+    
+    mappedValueOf: function(val){
+        var valStr = val.toString();
+        if (this._mapping && valStr in this._mapping) {
+            return this._mapping[valStr].toString();
+        }
+        return null;
+    },
+    
+    formatted: function(val){
+        return (this.valuePrefix || '').concat(this.mappedValueOf(val) || val.toString(), this.valueSuffix || '');
+    },
+    
+    changeValue: function(e){
+        var btn = e.path[0];
+        if (!btn || (btn !== this.$.moreBtn && btn !== this.$.lessBtn) || btn.hasAttribute('disabled') || e.type === this._blockedEventType) {
+            return;
+        }
+        // block simulated mouse events for touch/dual devices
+        // blocks the other input method for a short period
+        // block is released only after corresponding "up" event fired + block duration
+        this._blockedEventType = e.type.substring(0, 5) === 'touch' ? 'mousedown' : 'touchstart';
+        
+        // in-/decrement value
+        var increment = this.$.moreBtn === btn ? this.increment : this.increment * -1;
+        this.addToValue(increment);
+        
+        // continously in-/decrement value while holding down mouse/touching
+        this._holdStartTime = new Date().getTime();
+        var fn = function(){
+            if (!this._holdTimeout) {
+                return;
+            }
+            this.addToValue(increment);
+            this._holdTimeout = window.setTimeout(fn, this.calcHoldInterval(
+                    this.holdInterval, this._holdStartTime, new Date().getTime()));
+        }.bind(this);
+        this._holdTimeout = window.setTimeout(fn, this.holdInterval);
+    },
+    
+    clearHold: function(){
+        // clear timeout for continuously in-/decrementing value
+        this._holdTimeout && window.clearTimeout(this._holdTimeout);
+        this._holdTimeout = null;
+        this._holdStartTime = null;
+        
+        // unblock event type
+        this._unblockTimeout && window.clearTimeout(this._unblockTimeout);
+        var _this = this;
+        this._unblockTimeout = window.setTimeout(function(){
+            _this._blockedEventType = null;
+        }, this._blockDuration);
+    },
+    
+    calcHoldInterval: function(baseTimeout, startTime, currentTime){
+        var durationRel = (currentTime - startTime) / this._holdMinIntervalThreshold;
+        durationRel = durationRel < 1 ? durationRel : 1;
+        var timeout = baseTimeout - (durationRel * (baseTimeout * (1 - this._holdMinIntervalMultiplier)));
+        return Math.ceil(timeout);
+    },
+    
+    addToValue: function(change){
+        var val = Number(this.value) + change;
+        if (val > this.max) {
+            val = this.max;
+        }
+        else if (val < this.min) {
+            val = this.min;
+        }
+        if (val !== this.value) {
+            this.value = val;
+            this.scheduleEvent();
+        }
+    },
+    
+    scheduleEvent: function(){
+        this._changeTimeout && window.clearTimeout(this._changeTimeout);
+        if (!this.disabled) {
+            this._changeTimeout = setTimeout(function(){
+                this._eventTimeout = null;
+                this.fire('change');
+            }.bind(this), this.eventDelay);
+        }
+    }
+    
+});
+</script>
+</polymer-element>
