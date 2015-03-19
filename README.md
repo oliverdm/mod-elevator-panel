@@ -1,4 +1,4 @@
-# mod-elevator-panel
+# odm-elevator-panel
 
 HTML UI element that resembles an elevator panel with an "up" button, "down" button and a display.
 Implemented as a web component using [Google Polymer](https://www.polymer-project.org).
@@ -21,14 +21,14 @@ Implemented as a web component using [Google Polymer](https://www.polymer-projec
 
 ### Demo
 
-[Elevator panel examples](http://oliverdm.github.io/mod-elevator-panel/demo.html)
+[Elevator panel examples](http://oliverdm.github.io/odm-elevator-panel/demo.html)
 
 ### Example Usage
 
 ```
 <link rel="import" href="app-elevator-panel.html">
 
-<mod-elevator-panel id="panel"
+<odm-elevator-panel id="panel"
                     min="0"
                     max="100"
                     value="50"
@@ -40,7 +40,7 @@ Implemented as a web component using [Google Polymer](https://www.polymer-projec
                     iconMore="remove-circle"
                     eventDelay="1000"
                     holdInterval="250"
-                    horizontal></mod-elevator-panel>
+                    horizontal></odm-elevator-panel>
 ```
 
 ### Styling
@@ -87,7 +87,7 @@ Value style:
 }
 ```
 
-### <mod-elevator-panel> API
+### <odm-elevator-panel> API
 
 More documentation available in the source code.
 

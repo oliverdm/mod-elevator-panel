@@ -1,7 +1,7 @@
 {
-    "name": "mod-elevator-panel",
+    "name": "odm-elevator-panel",
     "version": "0.1.0",
-    "main": "mod-elevator-panel.html",
+    "main": "odm-elevator-panel.html",
     "ignore": ["demo.html", "README.md", ".gitignore"],
     "keywords": ["elevator", "input", "component"],
     "dependencies": {

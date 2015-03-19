@@ -2,17 +2,17 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>mod-elevator-panel demo</title>
+    <title>odm-elevator-panel demo</title>
     
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <script src="https://www.polymer-project.org/components/webcomponentsjs/webcomponents.js"></script>
-    <link rel="import" href="https://www.polymer-project.org/components/polymer/polymer.html">
-    <link rel="import" href="https://www.polymer-project.org/components/core-icon/core-icon.html">
-    <link rel="import" href="https://www.polymer-project.org/components/core-icons/core-icons.html">
-    <link rel="import" href="https://www.polymer-project.org/components/core-icons/hardware-icons.html">
-    <link rel="import" href="mod-elevator-panel.html">
+    <script src="//www.polymer-project.org/0.5/components/webcomponentsjs/webcomponents.min.js"></script>
+    <link rel="import" href="//www.polymer-project.org/0.5/components/polymer/polymer.html">
+    <link rel="import" href="//www.polymer-project.org/0.5/components/core-icon/core-icon.html">
+    <link rel="import" href="//www.polymer-project.org/0.5/components/core-icons/core-icons.html">
+    <link rel="import" href="//www.polymer-project.org/0.5/components/core-icons/hardware-icons.html">
+    <link rel="import" href="odm-elevator-panel.html">
     
     <style>
         html, body {
@@ -53,44 +53,44 @@
 
 <h5>Default appearance</h5>
 <div horizontal center justified layout>
-    <mod-elevator-panel></mod-elevator-panel>
+    <odm-elevator-panel></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
 <h5>Custom min, max, value, increment</h5>
 <div horizontal center justified layout>
-    <mod-elevator-panel min=-1000 max=1000 increment=100 value=-500></mod-elevator-panel>
+    <odm-elevator-panel min=-1000 max=1000 increment=100 value=-500></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
 <h5>Mapped values</h5>
 <div horizontal center justified layout>
-    <mod-elevator-panel min=-1 max=3 value=1 valueMap='{"-1": "Basement", "0": "Ground Floor", "1": "1st Floor", "2": "2nd Floor", "3": "3rd Floor"}'></mod-elevator-panel>
+    <odm-elevator-panel min=-1 max=3 value=1 valueMap='{"-1": "Basement", "0": "Ground Floor", "1": "1st Floor", "2": "2nd Floor", "3": "3rd Floor"}'></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
 <h5>Horizontal layout</h5>
 <div horizontal center justified layout>
-    <mod-elevator-panel horizontal></mod-elevator-panel>
+    <odm-elevator-panel horizontal></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
 <h5>Custom icons</h5>
 <div horizontal center justified layout>
-    <mod-elevator-panel iconMore="add" iconLess="remove"></mod-elevator-panel>
+    <odm-elevator-panel iconMore="add" iconLess="remove"></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
 <h5>Custom styles</h5>
 <div horizontal center justified layout>
-    <mod-elevator-panel id="styled" increment="5" value="50"></mod-elevator-panel>
+    <odm-elevator-panel id="styled" increment="5" value="50"></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
 <script>
 window.addEventListener('polymer-ready', function() {
     
-    var panels = document.querySelectorAll('mod-elevator-panel'),
+    var panels = document.querySelectorAll('odm-elevator-panel'),
         results = document.querySelectorAll('.result');
     
     for (var i = 0, len = panels.length; i < len; i++) {
