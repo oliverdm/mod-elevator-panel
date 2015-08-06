@@ -7,11 +7,12 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <script src="//www.polymer-project.org/0.5/components/webcomponentsjs/webcomponents.min.js"></script>
-    <link rel="import" href="//www.polymer-project.org/0.5/components/polymer/polymer.html">
-    <link rel="import" href="//www.polymer-project.org/0.5/components/core-icon/core-icon.html">
-    <link rel="import" href="//www.polymer-project.org/0.5/components/core-icons/core-icons.html">
-    <link rel="import" href="//www.polymer-project.org/0.5/components/core-icons/hardware-icons.html">
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <link rel="import" href="bower_components/polymer/polymer.html">
+    <link rel="import" href="bower_components/iron-icon/iron-icon.html">
+    <link rel="import" href="bower_components/iron-icons/iron-icons.html">
+    <link rel="import" href="bower_components/iron-icons/hardware-icons.html">
+    <link rel="import" href="bower_components/iron-flex-layout/classes/iron-flex-layout.html">
     <link rel="import" href="odm-elevator-panel.html">
     
     <style>
@@ -25,76 +26,87 @@
         body > div > div  {
             min-width: 140px;
         }
-        #styled::shadow core-icon {
-            width: 48px;
-            height: 48px;
-            color: black;
-            background-color: transparent;
-        }
-        #styled::shadow core-icon[disabled] {
-            color: lightgray !important;
-            background-color: transparent !important;
-        }
-        #styled::shadow core-icon:hover {
-            color: turquoise;
-            background-color: transparent;
-        }
-        #styled::shadow core-icon:active {
-            color: turquoise;
-            background-color: transparent;
-        }
-        #styled::shadow #valueContainer {
-            font-size: 1.5em;
-            font-weight: lighter;
+    </style>
+    
+    <style is="custom-style">
+        #styled {
+            --odm-elevator-panel-icon: {
+                width: 48px;
+                height: 48px;
+                color: black;
+                background-color: transparent;
+            };
+            --odm-elevator-panel-icon-disabled: {
+                color: lightgray !important;
+                background-color: transparent !important;
+            };
+            --odm-elevator-panel-icon-hover: {
+                color: turquoise;
+                background-color: transparent;
+            };
+            --odm-elevator-panel-icon-active: {
+                color: turquoise;
+                background-color: transparent;
+            };
+            --odm-elevator-panel-value: {
+                font-size: 1.5em;
+                font-weight: lighter;
+            };
         }
     </style>
 </head>
 <body unresolved>
 
 <h5>Default appearance</h5>
-<div horizontal center justified layout>
+<div class="horizontal center justified layout">
     <odm-elevator-panel></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
 <h5>Custom min, max, value, increment</h5>
-<div horizontal center justified layout>
+<div class="horizontal center justified layout">
     <odm-elevator-panel min=-1000 max=1000 increment=100 value=-500></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
 <h5>Mapped values</h5>
-<div horizontal center justified layout>
-    <odm-elevator-panel min=-1 max=3 value=1 valueMap='{"-1": "Basement", "0": "Ground Floor", "1": "1st Floor", "2": "2nd Floor", "3": "3rd Floor"}'></odm-elevator-panel>
+<div class="horizontal center justified layout">
+    <odm-elevator-panel min=-1 max=3 value=1 value-map='{"-1": "Basement", "0": "Ground Floor", "1": "1st Floor", "2": "2nd Floor", "3": "3rd Floor"}'></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
 <h5>Prefix &AMP; Suffix</h5>
-<div horizontal center justified layout>
-    <odm-elevator-panel valuePrefix="$" valueSuffix=".00"></odm-elevator-panel>
+<div class="horizontal center justified layout">
+    <odm-elevator-panel value-prefix="$" value-suffix=".00"></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
 <h5>Horizontal layout</h5>
-<div horizontal center justified layout>
+<div class="horizontal center justified layout">
     <odm-elevator-panel horizontal></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
 <h5>Custom icons</h5>
-<div horizontal center justified layout>
-    <odm-elevator-panel iconMore="add" iconLess="remove"></odm-elevator-panel>
+<div class="horizontal center justified layout">
+    <odm-elevator-panel icon-more-vertical="add" icon-less-vertical="remove"></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
 <h5>Custom styles</h5>
-<div horizontal center justified layout>
+<div class="horizontal center justified layout">
     <odm-elevator-panel id="styled" increment="5" value="50"></odm-elevator-panel>
     <div><span>Last event:</span><span class="result"></span></div>
 </div>
 
+<h5>Disabled</h5>
+<div class="horizontal center justified layout">
+    <odm-elevator-panel horizontal disabled value="42"></odm-elevator-panel>
+    <div><span>Last event:</span><span class="result"></span></div>
+</div>
+
 <script>
-window.addEventListener('polymer-ready', function() {
+window.addEventListener('WebComponentsReady', function() {
     
     var panels = document.querySelectorAll('odm-elevator-panel'),
         results = document.querySelectorAll('.result');

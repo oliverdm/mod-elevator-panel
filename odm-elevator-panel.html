@@ -1,10 +1,11 @@
-<link rel="import" href="../core-icon/core-icon.html">
-<link rel="import" href="../core-icons/core-icons.html">
-<link rel="import" href="../core-icons/hardware-icons.html">
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icons/hardware-icons.html">
+<link rel="import" href="../iron-flex-layout/classes/iron-flex-layout.html">
 
-<polymer-element name="odm-elevator-panel">
-<template>
-    
+<dom-module id="odm-elevator-panel">
+
 <style>
 :host {
     display: inline-block;
@@ -15,32 +16,39 @@
     -webkit-tap-highlight-color: rgba(0,0,0,0);
     -webkit-touch-callout: none;
 }
-core-icon {
+iron-icon {
     width: 32px;
     height: 32px;
     color: #000;
     background-color: #eee;
     cursor: pointer;
     border-radius: 2px;
+    @apply(--odm-elevator-panel-icon);
 }
-core-icon[disabled] {
+iron-icon[disabled],
+iron-icon.disabled {
     color: #ccc;
     background-color: #f3f3f3;
     cursor: default;
+    @apply(--odm-elevator-panel-icon-disabled);
 }
-core-icon:hover {
+iron-icon:not(.disabled):hover {
     color: #333;
+    @apply(--odm-elevator-panel-icon-hover);
 }
-core-icon:active {
+iron-icon:not(.disabled):active {
     color: #666;
     background-color: #f3f3f3;
+    @apply(--odm-elevator-panel-icon-active);
 }
 #valueContainer {
     position: relative;
     font-weight: bolder;
     cursor: default;
+    @apply(--odm-elevator-panel-value);
 }
-#val, #widthSpacer {
+#val,
+#widthSpacer {
     margin: 4px;
     text-align: center;
     white-space: pre;
@@ -50,42 +58,21 @@ core-icon:active {
 }
 </style>
 
-<!-- dynamic, self-centering layout -->
-<div vertical?="{{ !horizontal }}"
-     horizontal?="{{ horizontal }}"
-     reverse?="{{ horizontal }}"
-     center layout>
-    <core-icon id="moreBtn"
-               icon="{{ _iconMore }}"
-               disabled?="{{ value >= max || disabled }}"></core-icon>
+<template>
+<div id="panelContainer" class="vertical center layout">
+    <iron-icon id="moreBtn" icon="{{ _iconMore }}"></iron-icon>
     <div id="valueContainer">
-        <!-- expands to fill container completely -->
-        <div id="val" fit>{{ value | formatted }}</div>
-        <!-- provides consistent width (widest possible value) -->
+        <div id="val" class="fit">{{ format(value) }}</div>
         <div id="widthSpacer" aria-hidden="true"></div>
     </div>
-    <core-icon id="lessBtn"
-               icon="{{ _iconLess }}"
-               disabled?="{{ value <= min || disabled }}"></core-icon>
+    <iron-icon id="lessBtn" icon="{{ _iconLess }}"></iron-icon>
 </div>
-
 </template>
+
 <script>
 Polymer({
-    
-    /**
-     * Fired when the value changed through user interaction.
-     * The event can represent mutiple changes that are part of a single
-     * sequence of user interactions.
-     * The time window that defines which changes fall into a sequence is set
-     * by the <code>eventDelay</code> attribute.
-     * The event is not fired when the <code>disabled</code> attribute evaluates
-     * to true.
-     *
-     * @event change
-     */
-    
-    publish: {
+    is: 'odm-elevator-panel',
+    properties: {
         /**
          * Setting this property to true disables contained components and
          * prevents the <code>change</code> event from being fired.
@@ -95,8 +82,10 @@ Polymer({
          * @default false
          */
         disabled: {
+            type: Boolean,
             value: false,
-            reflect: true
+            reflectToAttribute: true,
+            observer: 'disabledChanged'
         },
         /**
          * If this property is set to true visual components are arranged in a
@@ -117,7 +106,12 @@ Polymer({
          * @type boolean
          * @default false
          */
-        horizontal: false,
+        horizontal: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true,
+            observer: 'horizontalChanged'
+        },
         /**
          * Optional prefix that is prepended to the value.
          * 
@@ -125,7 +119,10 @@ Polymer({
          * @type string
          * @default ""
          */
-        valuePrefix: '',
+        valuePrefix: {
+            value: '',
+            observer: 'updateWidth'
+        },
         /**
          * Optional suffix that is appended to the value.
          * 
@@ -133,35 +130,60 @@ Polymer({
          * @type string
          * @default ""
          */
-        valueSuffix: '',
+        valueSuffix: {
+            value: '',
+            observer: 'updateWidth'
+        },
         /**
-         * If this property is set the increment button icon is changed to this
-         * value. Must be a valid value for <code>core-icon</code>'s icon
-         * attribute: <code><core-icon icon={{ iconMore }}></code>.
-         * <br>
-         * Can be a String or an object of the following structure:
-         * <pre>
-         * {
-         *   "v": "iconToDisplayInVerticalLayout",
-         *   "h": "iconToDisplayInHorizontalLayout"
-         * }
-         * </pre>
-         * Note: icons must be available without further HTML imports; imports
-         * are not added automatically
+         * The icon source of the increment button when in vertical orientation.
          * 
-         * @attribute iconMore
-         * @type string|object
-         * @default {"v": "hardware:keyboard-arrow-up", "h": "hardware:keyboard-arrow-right"}
+         * @attribute iconMoreVertical
+         * @type String
+         * @default: "hardware:keyboard-arrow-up"
          */
-        iconMore: null,
+        iconMoreVertical: {
+            type: String,
+            value: 'hardware:keyboard-arrow-up',
+            observer: 'iconMoreChanged'
+        },
         /**
-         * Same as "iconMore" attribute but for the decrement button icon.
+         * The icon source of the increment button when in horizontal
+         * orientation.
          * 
-         * @attribute iconLess
-         * @type string|object
-         * @default {"v": "hardware:keyboard-arrow-down", "h": "hardware:keyboard-arrow-left"}
+         * @attribute iconMoreHorizontal
+         * @type String
+         * @default: "hardware:keyboard-arrow-right"
          */
-        iconLess: null,
+        iconMoreHorizontal: {
+            type: String,
+            value: 'hardware:keyboard-arrow-right',
+            observer: 'iconMoreChanged'
+        },
+        /**
+         * The icon source of the decrement button when in vertical orientation.
+         * 
+         * @attribute iconLessVertical
+         * @type String
+         * @default: "hardware:keyboard-arrow-down"
+         */
+        iconLessVertical: {
+            type: String,
+            value: 'hardware:keyboard-arrow-down',
+            observer: 'iconLessChanged'
+        },
+        /**
+         * The icon source of the decrenent button when in horizontal
+         * orientation.
+         * 
+         * @attribute iconLessHorizontal
+         * @type String
+         * @default: "hardware:keyboard-arrow-left"
+         */
+        iconLessHorizontal: {
+            type: String,
+            value: 'hardware:keyboard-arrow-left',
+            observer: 'iconLessChanged'
+        },
         /**
          * The current value.
          * Setting this property does not trigger the <code>change</code> event.
@@ -170,35 +192,10 @@ Polymer({
          * @type number
          * @default 0
          */
-        value: 0,
-        /**
-         * Optional mapping of numeric values to arbitrary string values.
-         * The numeric value is displayed if a mapping is not available for a 
-         * given value.
-         * Must be either an object:
-         * <pre>
-         * {
-         *   "0": "Mapped value for zero"
-         *   "1": "Mapped value for one"
-         *   ...
-         * }
-         * </pre>
-         * or an array:
-         * <pre>
-         * [
-         *   'Mapped value for zero',
-         *   'Mapped value for one'
-         * ]
-         * </pre>
-         * or a valid JSON string that contains an object/array.
-         * Values used as keys are guaranteed to be integers unless the
-         * increment itself is not an integer.
-         * 
-         * @attribute valueMap
-         * @type object
-         * @default null
-         */
-        valueMap: null,
+        value: {
+            type: Number,
+            value: 0
+        },
         /**
          * The minimum value.
          * Can be negative.
@@ -208,7 +205,11 @@ Polymer({
          * @type number
          * @default 0
          */
-        min: 0,
+        min: {
+            type: Number,
+            value: 0,
+            observer: 'updateWidth'
+        },
         /**
          * The maximum value.
          * Can be negative.
@@ -219,7 +220,11 @@ Polymer({
          * @type number
          * @default 100
          */
-        max: 100,
+        max: {
+            type: Number,
+            value: 100,
+            observer: 'updateWidth'
+        },
         /**
          * The increment per value change.
          * 
@@ -227,7 +232,25 @@ Polymer({
          * @type number
          * @default 1
          */
-        increment: 1,
+        increment: {
+            type: Number,
+            value: 1
+        },
+        /**
+         * Optional mapping of numeric values to arbitrary string values.
+         * The numeric value is displayed if a mapping is not available for a 
+         * given value.
+         * Must be a valid JSON string that contains an object or array.
+         * 
+         * @attribute valueMap
+         * @type String
+         * @default ""
+         */
+        valueMap: {
+            type: String,
+            value: '',
+            observer: 'valueMapChanged'
+        },
         /**
          * The pause in milliseconds after each value change that has to pass
          * for the <code>change</code> event to be triggered.
@@ -243,7 +266,10 @@ Polymer({
          * @type number
          * @default 750
          */
-        eventDelay: 750,
+        eventDelay: {
+            type: Number,
+            value: 500
+        },
         /**
          * The time delay in milliseconds when holding down the mouse or
          * touching a button until the value is changed continously.
@@ -255,16 +281,34 @@ Polymer({
          * @type number
          * @default 200
          */
-        holdInterval: 200
+        holdInterval: {
+            type: Number,
+            value: 200
+        }
     },
     
     /**
-     * Returns the mapped value for the current numeric value. Read-only.
+     * Define how values are presented.
+     * In case a mapping function is provided it overwrites the `valueMap`
+     * attribute permanently.
+     * If an object, array or null is given that setting can be overwritten by
+     * subsequent changes of the `valueMap` attribute.
      * 
-     * @returns {string|null} the mapped value or null
+     * @param {Object|Array|Function|null} map Either an object, array, null or
+     * a function that takes the numeric value as argument and returns a
+     * non-null value.
      */
-    get mappedValue(){
-        return this.mappedValueOf(this.value);
+    setMapping: function(map){
+        switch(Object.prototype.toString.call(map)) {
+            case '[object Object]':
+            case '[object Array]':
+            case '[object Null]':
+                this._mapping = map;
+                break;
+            case '[object Function]':
+                this._mappingCallback = map;
+                break;
+        }
     },
     
     _iconMore: '',
@@ -282,8 +326,9 @@ Polymer({
     _blockDuration: 1000,
     
     _mapping: null,
+    _mappingCallback: null,
     
-    eventDelegates: {
+    listeners: {
         'mousedown': 'changeValue',
         'touchstart': 'changeValue',
         'mouseup': 'clearHold',
@@ -291,98 +336,100 @@ Polymer({
         'mouseout': 'clearHold'
     },
     
-    observe: {
-        min: 'updateWidth',
-        max: 'updateWidth',
-        valuePrefix: 'updateWidth',
-        valueSuffix: 'updateWidth'
+    disabledChanged: function(disabled){
+        this.updateIcons(disabled);
     },
     
-    created: function(){
-        // default values for iconMore and iconLess
-        this.iconMore = this.iconMore || {
-            v: 'hardware:keyboard-arrow-up',
-            h: 'hardware:keyboard-arrow-right'
-        };
-        this.iconLess = this.iconLess || {
-            v: 'hardware:keyboard-arrow-down',
-            h: 'hardware:keyboard-arrow-left'
-        };
-        // initialize icons when not horizontal layout
-        this.horizontal || this.horizontalChanged();
-    },
-    
-    attached: function(){
-        this.updateWidth();
-    },
-    
-    iconMoreChanged: function(){
-        this._iconMore = this.iconMore[this.horizontal ? 'h' : 'v'] || this.iconMore;
-    },
-    
-    iconLessChanged: function(){
-        this._iconLess = this.iconLess[this.horizontal ? 'h' : 'v'] || this.iconLess;
-    },
-    
-    horizontalChanged: function(){
+    horizontalChanged: function(horizontal){
+        var el = this.$.panelContainer;
+        el.classList[horizontal ? 'remove' : 'add']('vertical');
+        el.classList[horizontal ? 'add' : 'remove']('horizontal-reverse');
         this.iconMoreChanged();
         this.iconLessChanged();
     },
     
-    valueMapChanged: function(){
-        switch (typeof this.valueMap) {
-            case 'object':
-                this._mapping = this.valueMap || {};
-                break;
-            case 'string':
-                try {
-                    this._mapping = JSON.parse(this.valueMap);
-                } catch(e) {
-                    this._mapping = {};
-                }
-                break;
-            default:
-                this._mapping = {};
-                break;
+    iconMoreChanged: function(){
+        this._iconMore = this.horizontal ? this.iconMoreHorizontal : this.iconMoreVertical;
+    },
+    
+    iconLessChanged: function(){
+        this._iconLess = this.horizontal ? this.iconLessHorizontal : this.iconLessVertical;
+    },
+    
+    valueMapChanged: function(valueMap){
+        var mapping = {};
+        if (valueMap && Object.prototype.toString.call(valueMap) === '[object String]') {
+            try {
+                mapping = JSON.parse(valueMap);
+            } catch(e) {
+                console.error(e);
+            }
         }
+        this._mapping = mapping;
         this.updateWidth();
         // Force update of value expression
-        // TODO Better way to update value expression
+        // TODO Find better way to update value expression
         this.value += '';
+    },
+    
+    attached: function(){
+        if (!this.horizontal) {
+            this.horizontalChanged();
+        }
+        this.updateWidth();
+        this.updateIcons();
     },
     
     updateWidth: function(){
         // find widest possible value
-        // use string length as best approximation
-        // (may be inaccurate for non-monospace fonts)
-        var maxVal = this.formatted(this.max),
-            minVal = this.formatted(this.min),
+        var maxVal = this.format(this.max),
+            minVal = this.format(this.min),
             maxStr = maxVal.length > minVal.length ? maxVal : minVal;
-        this._mapping && Object.keys(this._mapping).forEach(function(k){
-            var v = this.formatted(this._mapping[k]);
-            if (v.length > maxStr.length) {
-                maxStr = v;
-            }
-        }, this);
+        // for mapped values use string length as approximation
+        if (this._mapping) {
+            Object.keys(this._mapping).forEach(function(k){
+                var v = this.format(this._mapping[k]);
+                if (v.length > maxStr.length) {
+                    maxStr = v;
+                }
+            }, this);
+        }
         // update spacer width the widest value
         this.$.widthSpacer.textContent = maxStr;
     },
     
-    mappedValueOf: function(val){
-        var valStr = val.toString();
-        if (this._mapping && valStr in this._mapping) {
-            return this._mapping[valStr].toString();
+    getMappedValue: function(val){
+        var mappedValue = null;
+        if (this._mappingCallback) {
+            return this._mappingCallback.call(null, val);
         }
-        return null;
+        if (typeof val !== 'undefined' && val !== null && this._mapping && val.toString() in this._mapping) {
+            mappedValue = this._mapping[val.toString()];
+        }
+        return mappedValue !== null ? mappedValue.toString() : null;
     },
     
-    formatted: function(val){
-        return (this.valuePrefix || '').concat(this.mappedValueOf(val) || val.toString(), this.valueSuffix || '');
+    format: function(value){
+        var mappedValue = this.getMappedValue(value);
+        if (mappedValue !== null) {
+            return mappedValue;
+        }
+        var valueStr = this.valuePrefix || '';
+        if (typeof value !== 'undefined' && value !== null) {
+            valueStr += value.toString();
+        }
+        if (this.valueSuffix) {
+            valueStr += this.valueSuffix;
+        }
+        return valueStr;
     },
     
     changeValue: function(e){
-        var btn = e.path[0];
-        if (!btn || (btn !== this.$.moreBtn && btn !== this.$.lessBtn) || btn.hasAttribute('disabled') || e.type === this._blockedEventType) {
+        // prevent zooming on mobile devices when tapping
+        e.preventDefault();
+        
+        var target = Polymer.dom(e).rootTarget;
+        if (!target || (target !== this.$.moreBtn && target !== this.$.lessBtn) || target.classList.contains('disabled') || e.type === this._blockedEventType) {
             return;
         }
         // block simulated mouse events for touch/dual devices
@@ -390,11 +437,11 @@ Polymer({
         // block is released only after corresponding "up" event fired + block duration
         this._blockedEventType = e.type.substring(0, 5) === 'touch' ? 'mousedown' : 'touchstart';
         
-        // in-/decrement value
-        var increment = this.$.moreBtn === btn ? this.increment : this.increment * -1;
+        // increment/decrement the value
+        var increment = this.$.moreBtn === target ? this.increment : this.increment * -1;
         this.addToValue(increment);
         
-        // continously in-/decrement value while holding down mouse/touching
+        // continously increment/decrement value while holding down mouse or touching
         this._holdStartTime = new Date().getTime();
         var fn = function(){
             if (!this._holdTimeout) {
@@ -408,13 +455,17 @@ Polymer({
     },
     
     clearHold: function(){
-        // clear timeout for continuously in-/decrementing value
-        this._holdTimeout && window.clearTimeout(this._holdTimeout);
+        // clear timeout for continuously incrementing/decrementing the value
+        if (this._holdTimeout) {
+            window.clearTimeout(this._holdTimeout);
+        }
         this._holdTimeout = null;
         this._holdStartTime = null;
         
         // unblock event type
-        this._unblockTimeout && window.clearTimeout(this._unblockTimeout);
+        if (this._unblockTimeout) {
+            window.clearTimeout(this._unblockTimeout);
+        }
         var _this = this;
         this._unblockTimeout = window.setTimeout(function(){
             _this._blockedEventType = null;
@@ -436,10 +487,11 @@ Polymer({
         else if (val < this.min) {
             val = this.min;
         }
-        if (val !== this.value) {
+        if (val != this.value) {
             this.value = val;
             this.scheduleEvent();
         }
+        this.updateIcons();
     },
     
     scheduleEvent: function(){
@@ -450,8 +502,17 @@ Polymer({
                 this.fire('change');
             }.bind(this), this.eventDelay);
         }
+    },
+    
+    updateIcons: function(forceDisabled){
+        var moreDisabled = forceDisabled || this.disabled || Number(this.value) >= this.max;
+        this.$.moreBtn.classList[moreDisabled ? 'add' : 'remove']('disabled');
+        
+        var lessDisabled = forceDisabled || this.disabled || Number(this.value) <= this.min;
+        this.$.lessBtn.classList[lessDisabled ? 'add' : 'remove']('disabled');
     }
     
 });
 </script>
-</polymer-element>
+
+</dom-module>

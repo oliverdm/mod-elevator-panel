@@ -1,112 +1,93 @@
 # odm-elevator-panel
 
 HTML UI element that resembles an elevator panel with an "up" button, "down" button and a display.
-Implemented as a web component using [Google Polymer](https://www.polymer-project.org).
+Implemented as a web component for [Google Polymer 1.0](https://www.polymer-project.org).
 
 ### Features
 
  * Increase, decrease numeric value between min and max value
- * Change event consolidates multiple changes into one event
- * Click/touch and hold changes values continously (the longer the faster the value changes)
+ * Change event triggered
  * Vertical or horizontal layout
- * Map values to arbitrary strings for non-numeric presentation
- * Most parameters and styles customizable
+ * Custom CSS mixins
+ * Optional mapping of numeric values to strings
 
-### Dependencies
+### Demo & Examples
 
- * polymer#^0.5.5
- * webcomponentsjs#^0.5.5"
- * core-icon#^0.5.5
- * core-icons#^0.5.5
+[Examples](http://oliverdm.github.io/odm-elevator-panel/demo.html)
 
-### Demo
-
-[Elevator panel examples](http://oliverdm.github.io/odm-elevator-panel/demo.html)
-
-### Example Usage
+Element with all attributes defined:
 
 ```
-<link rel="import" href="app-elevator-panel.html">
+<link rel="import" href="odm-elevator-panel.html">
 
 <odm-elevator-panel id="panel"
                     min="0"
                     max="100"
                     value="50"
                     increment="5"
-                    valueMap="{{ {0: 'Min', 100: 'Max'} }}"
-                    valuePrefix=""
-                    valueSuffix="%"
-                    iconMore="add-circle"
-                    iconMore="remove-circle"
-                    eventDelay="1000"
-                    holdInterval="250"
-                    horizontal></odm-elevator-panel>
+                    value-map='{"0": "Min", "100": "Max"}'
+                    value-prefix="+"
+                    value-suffix="%"
+                    icon-more-vertical="add-circle"
+                    icon-more-horizontal="add-circle"
+                    icon-less-vertical="remove-circle"
+                    icon-less-horizontal="remove-circle"
+                    event-delay="500"
+                    hold-interval="200"
+                    horizontal
+                    disabled></odm-elevator-panel>
 ```
 
-### Styling
+### Custom Styles
 
-Icon style in neutral state:
+Custom styles possible via [Custom CSS mixins](https://www.polymer-project.org/1.0/docs/devguide/styling.html#custom-css-mixins).
+
+Example:
+
 ```
-#panel::shadow core-icon {
-  width: 48px;
-  height: 48px;
-  color: black;
-  background-color: transparent;
+#mypanel {
+    --odm-elevator-panel-icon: {
+        color: black;
+        background-color: transparent;
+    };
 }
 ```
 
-Icon style in disabled state:
-```
-#panel::shadow core-icon[disabled] {
-  color: lightgray !important;
-  background-color: transparent !important;
-}
-```
+Property                           | Description
+---------------------------------- | ----------------------------------------
+--odm-elevator-panel-icon          | Styles both icon buttons in normal state
+--odm-elevator-panel-icon-disabled | Styles both icon buttons in disabled state
+--odm-elevator-panel-icon-hover    | Styles both icon buttons when hovering
+--odm-elevator-panel-icon-active   | Styles both icon buttons when active
+--odm-elevator-panel-value         | Styles the displayed value
 
-Icon style when hovering with mouse:
-```
-#panel::shadow core-icon:hover {
-  color: white;
-  background-color: turquoise;
-}
-```
-
-Icon style in active state:
-```
-#panel::shadow core-icon:active {
-  color: turquoise;
-  background-color: transparent;
-}
-```
-
-Value style:
-```
-#panel::shadow #valueContainer {
-  font-size: 1.5em;
-  font-weight: lighter;
-}
-```
 
 ### <odm-elevator-panel> API
+
+All properties are also available as attributes of the element when the name is converted (camelCase to dash, e.g. `valuePrefix -> value-prefix`).
+However, only changes to the `disabled` and `horizontal` properties are reflected back to HTML.
 
 More documentation available in the source code.
 
 ##### `change` (event)
 
 Fired when the value changed.
-Can represent multiple changes made in quick succession.
+When multiply changes are made in quick succession, only the last change causes an event to be fired (according to `eventDelay` property).
 
-##### `mappedValue` (read-only attribute)
+##### `setMapping(map)` (function)
 
-Returns the mapped value or null if no mapping exists for the current value.
+Programmatically set how values are mapped for presentation. 
+Valid values are: Object, Array, Null or Function.
 
-##### `disabled` (attribute)
+##### `disabled` (property)
 
 Enables or disables the control.
+Reflected back to HTML.
 
 ##### `horizontal` (property)
 
 Switches to horizontal layout.
+Reflected back to HTML.
 
 ##### `valuePrefix` (property)
 
@@ -116,15 +97,9 @@ Prefix that is prepended to the value.
 
 Prefix that is appended to the value.
 
-##### `iconMore` (property)
+##### `iconMoreVertical`, `iconMoreHorizontal`, `iconLessVertical`, `iconLessHorizontal` (properties)
 
-The icon name as supplied to `<core-icon icon="...">`.
-Alternatively an object with two keys to change the icon depending on the layout: `{ "v": "verticalIcon", "h": "horizontalIcon" }`.
-The latter is only needed if the layout can change dynamically.
-
-##### `iconLess` (property)
-
-Same as `iconMore` but for the decrement button.
+The icon name as supplied to `<iron-icon icon="...">`.
 
 ##### `value` (property)
 
@@ -144,7 +119,7 @@ The value that is added or subtracted during each change.
 
 ##### `valueMap` (property)
 
-An object that maps values to arbitrary strings for presentation purposes. (object, array, or JSON string)
+An object or array as JSON formatted string that maps values to arbitrary strings for presentation.
 
 ##### `eventDelay` (property)
 
